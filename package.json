@@ -5,7 +5,7 @@
   "description": "Accounts and listening statistics for Spicetify",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/apply-schema.mjs && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
