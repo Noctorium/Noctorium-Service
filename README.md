@@ -6,63 +6,51 @@ and how many hours that adds up to.
 
 Next.js on Vercel, Postgres on Neon.
 
-## What you have to set up
+## Status
 
-Four things need a human with an account. Everything else is already here.
+Live at **https://spicetify-service.vercel.app**, on the `spicetify-service` Vercel project with a Neon
+database attached. Signing up, signing in, recording listens and reading statistics have all been exercised
+against the deployment.
 
-### 1. A Neon database
+## How it is configured
 
-1. Sign in at [neon.tech](https://neon.tech) and create a project.
-2. Open **Connection Details** and copy the **pooled** connection string. It has `-pooler` in the host and
-   ends with `?sslmode=require`. The pooled one matters: serverless functions open a connection per
-   invocation and the direct endpoint will run out.
+Already done, recorded here so it can be redone or understood later.
 
-### 2. A signing secret
+- **Database.** Vercel's Neon integration sets `DATABASE_URL` (the pooled endpoint) on Production and
+  Preview, along with a number of aliases the code does not use.
+- **`AUTH_SECRET`.** Set on Production, Preview and Development. It signs session tokens; replacing it
+  signs everybody out, so it is worth leaving alone.
+- **Framework.** `vercel.json` declares the Next.js preset. Without it the project looked for a static
+  `public/` directory and refused a build that had produced a Next application.
+- **Tables.** `db/schema.sql` is applied by the build, not by hand. Vercel supplies `DATABASE_URL` to a
+  build but will not release it to a local `vercel env pull`, so the deploy is the one place that can
+  reach the database. Every statement is repeatable, so this is a no-op once the tables exist.
 
-This signs session tokens. Generate one:
+To deploy: `vercel deploy --prod`. To change an environment variable: `vercel env add NAME production`.
 
-```bash
-node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
-```
+## Setting this up somewhere else
 
-Keep it. Changing it later signs everybody out.
+1. Create a Neon project and attach it to the Vercel project, or set `DATABASE_URL` to its **pooled**
+   connection string by hand. Pooled matters: a function opens a connection per invocation and the direct
+   endpoint runs out.
+2. Generate a signing secret and set it as `AUTH_SECRET`:
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
+   ```
+3. Deploy. The build creates the tables.
 
-### 3. The Vercel project
-
-1. Push this repository to GitHub, then import it at [vercel.com/new](https://vercel.com/new).
-2. Under **Settings → Environment Variables**, add both, for Production, Preview and Development:
-
-   | Name | Value |
-   |------|-------|
-   | `DATABASE_URL` | the pooled Neon string from step 1 |
-   | `AUTH_SECRET`  | the secret from step 2 |
-
-3. Deploy.
-
-### 4. Create the tables
-
-Once `DATABASE_URL` is set, run this locally against the same database:
-
-```bash
-npm install
-DATABASE_URL="postgresql://..." npm run db:push
-```
-
-It applies `db/schema.sql`, which is written to be safe to run more than once.
-
-### If your deployment is not at the default address
-
-The player looks for `https://spicetify-service.vercel.app`. To point it somewhere else, set
-`SPICETIFY_SERVICE_URL` in the player's environment.
+If the deployment is not at the default address, point the player at it with `SPICETIFY_SERVICE_URL`.
 
 ## Running it locally
 
 ```bash
 npm install
-cp .env.example .env.local     # then fill both values in
-npm run db:push
+vercel env pull .env.local --environment=development
 npm run dev
 ```
+
+`vercel env pull` will not release Production secrets, so a local run needs the Development environment to
+carry its own `DATABASE_URL` — a Neon branch is the tidy way to do that without touching live data.
 
 ## Checks
 
@@ -128,6 +116,6 @@ counted again, so a client that never saw a reply can safely send it a second ti
   that; worth doing before this is public.
 - **Password reset.** There is no way back in from a forgotten password. It needs somewhere to send email.
 - **Email verification.** Addresses are accepted as given.
-- The database-backed paths have not been run against a real Postgres yet — see the note in the player
-  repository's history. The SQL is straightforward, but treat the first `npm run db:push` and first signup
-  as the real test.
+- **A verification account** is in the database from testing the deployment: the address ends
+  `@spicetify.invalid`, so it can never receive mail. Remove it from the Neon SQL editor with
+  `DELETE FROM users WHERE email LIKE '%@spicetify.invalid';` — its listens go with it.
