@@ -129,5 +129,5 @@ counted again, so a client that never saw a reply can safely send it a second ti
 - **Password reset.** There is no way back in from a forgotten password. It needs somewhere to send email.
 - **Email verification.** Addresses are accepted as given.
 - **Two verification accounts** are in the database from testing the deployment: their addresses end
-  `@spicetify.invalid`, so they can never receive mail. Remove it from the Neon SQL editor with
-  `DELETE FROM users WHERE email LIKE '%@spicetify.invalid';` — its listens go with it.
+  `@spicetify.invalid`, so they can never receive mail. Remove them from the Neon SQL editor with
+  `DELETE FROM users WHERE email LIKE '%@spicetify.invalid';` — their listens go with them.
