@@ -1,6 +1,8 @@
 import { db } from "@/lib/db"
 import { hashPassword } from "@/lib/password"
 import { issueToken, sessionCookie } from "@/lib/session"
+import { PER_ADDRESS_SIGN_UP, bucket, callerAddress, tooManyAttempts } from "@/lib/rate-limit"
+import { consume } from "@/lib/rate-limit-store"
 import { checkPassword, cleanDisplayName, cleanEmail, emailKey, jsonError, readJson } from "@/lib/validate"
 
 export const runtime = "nodejs"
@@ -15,6 +17,12 @@ export async function POST(request: Request) {
 
   const password = checkPassword(body.password)
   if ("error" in password) return jsonError(password.error, 400)
+
+  // Counted after the body is checked, so a malformed request does not spend somebody's allowance, and
+  // before any hashing, so making accounts in bulk cannot be used to keep the server busy with scrypt.
+  const address = bucket("signup", callerAddress(request))
+  const allowance = await consume(address, PER_ADDRESS_SIGN_UP)
+  if (!allowance.allowed) return tooManyAttempts(allowance.retryAfterSeconds)
 
   const displayName = cleanDisplayName(body.displayName, email.split("@")[0])
   const passwordHash = await hashPassword(password.password)

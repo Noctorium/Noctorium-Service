@@ -1,6 +1,14 @@
 import { db } from "@/lib/db"
 import { hashPassword, verifyPassword } from "@/lib/password"
 import { issueToken, sessionCookie } from "@/lib/session"
+import {
+  PER_ACCOUNT_SIGN_IN,
+  PER_ADDRESS_SIGN_IN,
+  bucket,
+  callerAddress,
+  tooManyAttempts,
+} from "@/lib/rate-limit"
+import { consume, forget } from "@/lib/rate-limit-store"
 import { cleanEmail, emailKey, jsonError, readJson } from "@/lib/validate"
 
 export const runtime = "nodejs"
@@ -28,6 +36,18 @@ export async function POST(request: Request) {
   const refusal = "That email address and password do not match an account."
   if (!email || !password) return jsonError(refusal, 401)
 
+  // Two buckets, because either one alone leaves a way round. Limiting by address only lets somebody with
+  // a pool of addresses grind a single account; limiting by account only lets them spread thinly across
+  // many accounts from one machine. The address is counted first so a flood is stopped before it reaches
+  // the database for a user row.
+  const address = bucket("ip", callerAddress(request))
+  const fromAddress = await consume(address, PER_ADDRESS_SIGN_IN)
+  if (!fromAddress.allowed) return tooManyAttempts(fromAddress.retryAfterSeconds)
+
+  const account = bucket("login", emailKey(email))
+  const forAccount = await consume(account, PER_ACCOUNT_SIGN_IN)
+  if (!forAccount.allowed) return tooManyAttempts(forAccount.retryAfterSeconds)
+
   const found = await db()`
     SELECT id, email, display_name, password_hash FROM users WHERE email_key = ${emailKey(email)} LIMIT 1
   `
@@ -38,6 +58,10 @@ export async function POST(request: Request) {
 
   const user = found[0] as { id: number; email: string; display_name: string; password_hash: string }
   if (!(await verifyPassword(password, user.password_hash))) return jsonError(refusal, 401)
+
+  // The right password clears the account's count, so a few mistypes before it do not lock anyone out of
+  // their own account. The address count is left alone: it is there to slow a machine, not a person.
+  await forget(account)
 
   const token = await issueToken({ userId: Number(user.id), email: user.email })
   const cookie = sessionCookie(token)

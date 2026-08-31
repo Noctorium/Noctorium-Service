@@ -35,3 +35,17 @@ CREATE TABLE IF NOT EXISTS plays (
 CREATE INDEX IF NOT EXISTS plays_user_played_at_idx ON plays (user_id, played_at DESC);
 -- Distinct songs are counted over this pair, so let the index answer it.
 CREATE INDEX IF NOT EXISTS plays_user_track_idx ON plays (user_id, provider, track_id);
+
+-- Throttling for the endpoints anyone can reach without signing in first.
+--
+-- One row per bucket rather than one per attempt: a row-per-attempt table grows with the traffic it is
+-- meant to be resisting, which hands an attacker a second way to hurt the database. This holds a count and
+-- the moment its window opened, and rolls over in place.
+CREATE TABLE IF NOT EXISTS auth_attempts (
+    bucket            TEXT        PRIMARY KEY,
+    window_started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    attempts          INTEGER     NOT NULL DEFAULT 0
+);
+
+-- Buckets nobody has touched in a long while can be swept without affecting anything live.
+CREATE INDEX IF NOT EXISTS auth_attempts_window_idx ON auth_attempts (window_started_at);
