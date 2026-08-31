@@ -109,13 +109,25 @@ counted again, so a client that never saw a reply can safely send it a second ti
   wrong as the rows.
 - **Every value** reaching the database is a bound parameter. Nothing from a request is ever part of a
   statement's text.
+- **Signing in and signing up are throttled**, counted in Postgres because serverless instances share no
+  memory — an in-process counter would be wiped by every cold start and invisible to the instances beside
+  it. One row per bucket, rolled over in place, so the table cannot be grown by the traffic it resists.
+
+  | What | Limit | Window |
+  |------|-------|--------|
+  | Sign-in, one account | 8 | 15 minutes |
+  | Sign-in, one address | 40 | 15 minutes |
+  | Sign-up, one address | 8 | 1 hour |
+
+  Both sign-in limits are needed: by address alone, somebody with a pool of addresses grinds one account;
+  by account alone, they spread thinly across many accounts from one machine. A correct password clears
+  that account's count, so mistyping a few times before getting it right cannot lock anyone out. Bucket
+  keys are hashed, so the table never becomes a second record of who has been typing which address.
 
 ## Not done yet
 
-- **Rate limiting.** Sign-in has no attempt limit. Vercel's WAF, or a small table of attempts, would close
-  that; worth doing before this is public.
 - **Password reset.** There is no way back in from a forgotten password. It needs somewhere to send email.
 - **Email verification.** Addresses are accepted as given.
-- **A verification account** is in the database from testing the deployment: the address ends
-  `@spicetify.invalid`, so it can never receive mail. Remove it from the Neon SQL editor with
+- **Two verification accounts** are in the database from testing the deployment: their addresses end
+  `@spicetify.invalid`, so they can never receive mail. Remove it from the Neon SQL editor with
   `DELETE FROM users WHERE email LIKE '%@spicetify.invalid';` — its listens go with it.
