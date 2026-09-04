@@ -1,8 +1,8 @@
 {
-  "name": "spicetify-service",
+  "name": "spiceity-service",
   "version": "0.1.0",
   "private": true,
-  "description": "Accounts and listening statistics for Spicetify",
+  "description": "Accounts and listening statistics for Spiceity",
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/apply-schema.mjs && next build",

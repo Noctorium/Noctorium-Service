@@ -1,6 +1,6 @@
-# Spicetify Service
+# Spiceity Service
 
-Accounts and listening statistics for [Spicetify](https://github.com/Spice-Production). One account works
+Accounts and listening statistics for [Spiceity](https://github.com/Spice-Production). One account works
 in both the player and this website: it counts how many songs you have streamed, how many different ones,
 and how many hours that adds up to.
 
@@ -8,7 +8,7 @@ Next.js on Vercel, Postgres on Neon.
 
 ## Status
 
-Live at **https://spicetify-service.vercel.app**, on the `spicetify-service` Vercel project with a Neon
+Live at **https://spiceity-service.vercel.app**, on the `spiceity-service` Vercel project with a Neon
 database attached. Signing up, signing in, recording listens and reading statistics have all been exercised
 against the deployment.
 
@@ -39,7 +39,7 @@ To deploy: `vercel deploy --prod`. To change an environment variable: `vercel en
    ```
 3. Deploy. The build creates the tables.
 
-If the deployment is not at the default address, point the player at it with `SPICETIFY_SERVICE_URL`.
+If the deployment is not at the default address, point the player at it with `SPICEITY_SERVICE_URL`.
 
 ## Running it locally
 
@@ -129,5 +129,5 @@ counted again, so a client that never saw a reply can safely send it a second ti
 - **Password reset.** There is no way back in from a forgotten password. It needs somewhere to send email.
 - **Email verification.** Addresses are accepted as given.
 - **Two verification accounts** are in the database from testing the deployment: their addresses end
-  `@spicetify.invalid`, so they can never receive mail. Remove them from the Neon SQL editor with
-  `DELETE FROM users WHERE email LIKE '%@spicetify.invalid';` — their listens go with them.
+  `@spiceity.invalid`, so they can never receive mail. Remove them from the Neon SQL editor with
+  `DELETE FROM users WHERE email LIKE '%@spiceity.invalid';` — their listens go with them.

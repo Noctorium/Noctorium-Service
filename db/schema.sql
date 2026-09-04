@@ -1,4 +1,4 @@
--- Spicetify accounts and listening history.
+-- Spiceity accounts and listening history.
 -- Safe to run more than once.
 
 CREATE TABLE IF NOT EXISTS users (

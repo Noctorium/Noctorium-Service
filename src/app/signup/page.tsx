@@ -39,7 +39,7 @@ export default function SignUp() {
   return (
     <main className="wrap narrow">
       <div className="brand">
-        <span className="mark">S</span> Spicetify
+        <span className="mark">S</span> Spiceity
       </div>
       <h1>Create an account</h1>
       <p className="lede">Used by both the website and the player.</p>

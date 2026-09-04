@@ -42,7 +42,7 @@ export default async function Dashboard() {
     <main className="wrap">
       <div className="row">
         <div className="brand">
-          <span className="mark">S</span> Spicetify
+          <span className="mark">S</span> Spiceity
         </div>
         <SignOut />
       </div>
