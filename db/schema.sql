@@ -1,4 +1,4 @@
--- Spiceity accounts and listening history.
+-- Noctorium accounts and listening history.
 -- Safe to run more than once.
 
 CREATE TABLE IF NOT EXISTS users (

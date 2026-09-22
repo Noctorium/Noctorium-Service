@@ -38,7 +38,7 @@ export default function LogIn() {
   return (
     <main className="wrap narrow">
       <div className="brand">
-        <span className="mark">S</span> Spiceity
+        <span className="mark">N</span> Noctorium
       </div>
       <h1>Sign in</h1>
       <form className="card" onSubmit={submit}>

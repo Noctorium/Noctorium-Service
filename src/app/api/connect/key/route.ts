@@ -12,7 +12,7 @@ export const runtime = "nodejs"
  * for every device on the account and is derived, not stored, so this endpoint reads nothing and writes
  * nothing.
  *
- * Devices are expected to ask once and keep the answer somewhere safe. Spiceity Connect works with no
+ * Devices are expected to ask once and keep the answer somewhere safe. Noctorium Connect works with no
  * internet at all once they have it, which is the point: two devices on the same wifi with the router's
  * uplink down should still see each other.
  */

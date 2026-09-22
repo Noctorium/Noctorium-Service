@@ -1,8 +1,8 @@
 {
-  "name": "spiceity-service",
+  "name": "noctorium-service",
   "version": "0.1.0",
   "private": true,
-  "description": "Accounts and listening statistics for Spiceity",
+  "description": "Accounts and listening statistics for Noctorium",
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/apply-schema.mjs && next build",

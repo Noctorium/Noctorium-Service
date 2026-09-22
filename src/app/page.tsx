@@ -4,11 +4,11 @@ export default function Home() {
   return (
     <main className="wrap">
       <div className="brand">
-        <span className="mark">S</span> Spiceity
+        <span className="mark">N</span> Noctorium
       </div>
       <h1>Your listening, counted.</h1>
       <p className="lede">
-        A Spiceity account keeps track of what you play: how many songs you have streamed, how many
+        A Noctorium account keeps track of what you play: how many songs you have streamed, how many
         different ones, and how many hours that adds up to. Sign in here or in the player — it is the same
         account either way.
       </p>

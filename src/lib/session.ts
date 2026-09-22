@@ -9,7 +9,7 @@ import { cookies } from "next/headers"
  * it gets the token in the reply and sends it back as a bearer header. Both are the same signed token and
  * are verified by the same code, so there is only one way in to get wrong.
  */
-export const SESSION_COOKIE = "spiceity_session"
+export const SESSION_COOKIE = "noctorium_session"
 
 /** Long enough that the player is not signing in every week, short enough that a leaked token expires. */
 const LIFETIME_SECONDS = 60 * 60 * 24 * 90
