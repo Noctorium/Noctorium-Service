@@ -1,0 +1,45 @@
+name: CI
+
+# Every push and every pull request. The service is small and its tests are pure -- no database is
+# needed, because everything that talks to one is behind a function the tests call directly.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Tests and types
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # ci rather than install: the lockfile is the point, and a CI run that quietly resolved something
+      # else is a CI run that tested something nobody has.
+      - run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      - name: Types
+        run: npm run typecheck
+
+      # The build applies db/schema.sql, which needs a database Vercel supplies and CI does not, so only
+      # the Next build itself is exercised here. Vercel runs the full one on deploy.
+      - name: Next build
+        run: npx next build
+        env:
+          # Enough for the build to import the modules that read it; nothing is queried at build time.
+          AUTH_SECRET: ci-build-only-secret-that-is-long-enough-to-pass
