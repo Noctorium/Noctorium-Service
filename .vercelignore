@@ -1,0 +1,2 @@
+# The local run's PGlite database and signing secret (npm run dev:local): never part of a deployment.
+.local
