@@ -10,3 +10,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# A local run's own database and signing secret (scripts/dev-local.mjs).
+.local/

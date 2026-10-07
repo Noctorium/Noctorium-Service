@@ -10,7 +10,9 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "node --test --experimental-strip-types test/*.test.ts",
-    "db:push": "node scripts/apply-schema.mjs"
+    "db:push": "node scripts/apply-schema.mjs",
+    "dev:local": "node scripts/dev-local.mjs",
+    "seed:local": "node scripts/seed-local.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
@@ -20,6 +22,7 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.3.16",
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",

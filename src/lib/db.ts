@@ -1,4 +1,5 @@
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless"
+import { localDb } from "./local-db"
 
 /**
  * The Neon connection.
@@ -17,6 +18,10 @@ let connection: NeonQueryFunction<false, false> | null = null
 
 export function db(): NeonQueryFunction<false, false> {
   if (connection) return connection
+  // A computer with no Neon database: a Postgres of its own in a folder, for running the service and the apps
+  // against it while they are made. Never set on a deployment; see localDb.
+  const local = process.env.NOCTORIUM_LOCAL_DB
+  if (local) return (connection = localDb(local))
   const url = process.env.DATABASE_URL
   if (!url) throw new Error("DATABASE_URL is not set; add it in the Vercel project settings.")
   connection = neon(url)
