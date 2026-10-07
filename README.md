@@ -43,8 +43,22 @@ If the deployment is not at the default address, point the player at it with `NO
 
 ## Running it locally
 
+With a database of its own, for making the player and Noctorium Stats against it:
+
 ```bash
 npm install
+npm run dev:local     # http://localhost:3000, a PGlite Postgres in .local/db
+npm run seed:local    # two made-up accounts: a year and more of listening, and none at all
+```
+
+No Neon and no Vercel: `dev:local` keeps the database and a signing secret in `.local/`, which git ignores,
+and `seed:local` refuses any address but this computer's. Its accounts and their password are at the top of
+`scripts/seed-local.mjs`; every artist and song in it is invented. Point an app at it with
+`NOCTORIUM_SERVICE_URL=http://localhost:3000` (the phone reaches it through `adb reverse tcp:3000 tcp:3000`).
+
+Against a Neon database instead:
+
+```bash
 vercel env pull .env.local --environment=development
 npm run dev
 ```
@@ -55,7 +69,7 @@ carry its own `DATABASE_URL` — a Neon branch is the tidy way to do that withou
 ## Checks
 
 ```bash
-npm test        # unit tests: password hashing, validation, the batch insert
+npm test        # unit tests: password hashing, validation, the batch insert, the statistics against PGlite
 npm run typecheck
 npm run build
 ```
@@ -72,7 +86,7 @@ the player sends `Authorization: Bearer <token>`.
 | `POST` | `/api/auth/logout` | clears the browser cookie |
 | `GET`  | `/api/auth/me`     | who the caller is, or 401 |
 | `POST` | `/api/plays`       | `{ plays: [...] }` → `{ accepted, duplicates, rejected }` |
-| `GET`  | `/api/stats`       | totals, per-service split, and most played |
+| `GET`  | `/api/stats`       | totals, per-service split, most played, and the charts — see below |
 
 ### Reporting a listen
 
@@ -94,6 +108,24 @@ the player sends `Authorization: Bearer <token>`.
 
 `clientId` is the player's own id for that listen. Sending the same one twice is discarded rather than
 counted again, so a client that never saw a reply can safely send it a second time.
+
+### Reading the statistics
+
+`GET /api/stats` takes three optional parameters. Asked with none, it answers as it always has: all time,
+the ten most played, days by UTC.
+
+| Parameter | Values | Default |
+|-----------|--------|---------|
+| `range` | `7d`, `30d`, `90d`, `365d`, `all` | `all` |
+| `tz` | the caller's offset from UTC in minutes, east positive (`60` for Paris in winter) | `0` |
+| `limit` | how many top songs and artists, `1` to `50` | `10` |
+
+A range counts whole days on the caller's own clock: `7d` is today and the six days before it. Alongside the
+totals, `byProvider` and `topTracks` it returns `topArtists`; `timeline`, the listening by day, or by month
+once the span is over four months, with the empty days and months filled in as zeros so a chart needs no
+guessing; `hourly` (24) and `weekdays` (7, Monday first) on the caller's clock; the 30 most `recent` listens;
+and the `streak`, the days in a row with something played, current and longest. Noctorium Stats, on the
+computer and on the phone, is built on it.
 
 ## How it is built
 
