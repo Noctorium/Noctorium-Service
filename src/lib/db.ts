@@ -1,5 +1,5 @@
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless"
-import { localDb } from "./local-db"
+import { localDb } from "./local-db.ts"
 
 /**
  * The Neon connection.

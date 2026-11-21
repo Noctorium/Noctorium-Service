@@ -55,3 +55,16 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .row { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
 .ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); width: auto; margin: 0; padding: 8px 14px; font-size: 13.5px; }
 .empty { color: var(--muted); border: 1px dashed var(--line); border-radius: 14px; padding: 26px; text-align: center; }
+
+/* Signing in with Discord, GitHub or Telegram. */
+.or { text-align: center; color: var(--muted); font-size: 13px; margin: 18px 0 12px; }
+.providers { display: grid; gap: 10px; }
+.provider { display: block; text-align: center; padding: 12px 14px; border-radius: 10px; font-weight: 600; text-decoration: none; color: #fff; border: 1px solid var(--line); }
+.provider.discord { background: #5865f2; border-color: #5865f2; }
+.provider.github { background: #24292f; }
+.provider:hover { filter: brightness(1.1); }
+.telegram-widget { display: flex; justify-content: center; min-height: 40px; }
+.code { font-size: 34px; font-weight: 700; letter-spacing: 0.12em; text-align: center; margin: 8px 0 18px; font-variant-numeric: tabular-nums; }
+.ways td form { display: inline; }
+.ways button.link { background: none; border: 0; color: var(--accent, inherit); padding: 0; font: inherit; cursor: pointer; text-decoration: underline; }
+.notice { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 14px 0; font-size: 14px; }

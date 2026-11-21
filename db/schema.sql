@@ -80,3 +80,30 @@ CREATE TABLE IF NOT EXISTS telegram_links (
     bio_changed_at   TIMESTAMPTZ,
     updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Accounts made with Discord, GitHub or Telegram have no password, and Telegram gives no email.
+ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
+ALTER TABLE users ALTER COLUMN email_key DROP NOT NULL;
+
+-- The other ways to sign in to an account: one row per Discord, GitHub or Telegram account linked to it. A
+-- provider's account belongs to one Noctorium account only; linking it to a second is refused, never merged.
+CREATE TABLE IF NOT EXISTS identities (
+    provider         TEXT        NOT NULL,
+    provider_user_id TEXT        NOT NULL,
+    user_id          BIGINT      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name             TEXT        NOT NULL,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (provider, provider_user_id)
+);
+CREATE INDEX IF NOT EXISTS identities_user_idx ON identities (user_id);
+
+-- Signing an app in from a browser: the app shows a code, the listener allows it at /device, and the app, which
+-- holds the poll secret (only its hash is kept), collects its token. Ten minutes, then gone.
+CREATE TABLE IF NOT EXISTS device_logins (
+    code       TEXT        PRIMARY KEY,
+    poll_hash  TEXT        NOT NULL UNIQUE,
+    user_id    BIGINT      REFERENCES users(id) ON DELETE CASCADE,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);

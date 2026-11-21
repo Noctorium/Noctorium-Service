@@ -41,7 +41,8 @@ export async function readToken(token: string | undefined | null): Promise<Sessi
     const { payload } = await jwtVerify(token, secret(), { algorithms: ["HS256"] })
     const userId = Number(payload.sub)
     const email = typeof payload.email === "string" ? payload.email : null
-    if (!Number.isInteger(userId) || userId <= 0 || !email) return null
+    // An account made with Telegram has no email: "" in its token, never a missing claim.
+    if (!Number.isInteger(userId) || userId <= 0 || email === null) return null
     return { userId, email }
   } catch {
     return null

@@ -3,13 +3,18 @@ import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
 import { SESSION_COOKIE, readToken } from "@/lib/session"
 import SignOut from "./sign-out"
+import Providers from "../providers"
+import { PROVIDER_NAMES, PROVIDERS, waysIn } from "@/lib/identity"
+import { configured } from "@/lib/oauth"
+import { telegramBot } from "@/lib/telegram-login"
 
 export const dynamic = "force-dynamic"
 
 /** Whole numbers with thin separators, so six figures stay readable at a glance. */
 const count = (value: number) => value.toLocaleString("en-US")
 
-export default async function Dashboard() {
+export default async function Dashboard({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+  const said = await searchParams
   const jar = await cookies()
   const session = await readToken(jar.get(SESSION_COOKIE)?.value)
   if (!session) redirect("/login")
@@ -41,6 +46,19 @@ export default async function Dashboard() {
   `) as { discord: string | null; telegram: string | null }[]
   const links = { discord: linkRow?.discord ?? null, telegram: linkRow?.telegram ?? null }
 
+  const ways = await waysIn(session.userId)
+  const available = PROVIDERS.filter((p) => (p === "telegram" ? telegramBot() !== null : configured(p)))
+  const notice =
+    said.linked ? `${PROVIDER_NAMES[said.linked as keyof typeof PROVIDER_NAMES] ?? said.linked} is linked: you can sign in with it now.`
+      : said.taken ? `That ${PROVIDER_NAMES[said.taken as keyof typeof PROVIDER_NAMES] ?? said.taken} account already signs in to a different Noctorium account.`
+        : said.unlinked ? `${PROVIDER_NAMES[said.unlinked as keyof typeof PROVIDER_NAMES] ?? said.unlinked} is unlinked.`
+          : said.last ? "That is your only way to sign in, so it stays. Link another, or set a password, first."
+            : said.password === "set" ? "Your password is set: you can sign in with your email too."
+              : said.password ? said.password
+                : said.discord === "connected" ? "Discord is connected: your status shows what you play."
+                  : said.discord === "invalid_scope" ? "Discord did not allow showing your status from Noctorium yet."
+                    : null
+
   const streams = Number(totals.streams)
   const hours = Number(totals.ms_played) / 3_600_000
 
@@ -54,6 +72,7 @@ export default async function Dashboard() {
       </div>
 
       <h1>{profile.display_name}</h1>
+      {notice && <div className="notice">{notice}</div>}
       <p className="lede">Everything the player has recorded for you.</p>
 
       <div className="grid">
@@ -99,6 +118,54 @@ export default async function Dashboard() {
             ))}
           </tbody>
         </table>
+      )}
+
+      <h2>Ways to sign in</h2>
+      <table className="ways">
+        <tbody>
+          <tr>
+            <td>Email and password</td>
+            <td className="muted">{ways.password ? ways.email : "Not set"}</td>
+            <td className="num">{ways.password ? "" : "Set one below"}</td>
+          </tr>
+          {available.map((provider) => (
+            <tr key={provider}>
+              <td>{PROVIDER_NAMES[provider]}</td>
+              <td className="muted">{ways.linked[provider] ?? "Not linked"}</td>
+              <td className="num">
+                {ways.linked[provider] ? (
+                  <form method="post" action="/api/auth/unlink">
+                    <input type="hidden" name="provider" value={provider} />
+                    <button className="link" type="submit">Unlink</button>
+                  </form>
+                ) : provider === "telegram" ? (
+                  "Link below"
+                ) : (
+                  <a href={`/api/auth/oauth/${provider}?intent=link`}>Link</a>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {available.includes("telegram") && !ways.linked.telegram && (
+        <div style={{ marginTop: 12 }}>
+          <Providers next="/dashboard" intent="link" telegramOnly />
+        </div>
+      )}
+      {!ways.password && (
+        <form className="card" method="post" action="/api/auth/password" style={{ marginTop: 14 }}>
+          <p className="muted">Add a password, to sign in with your email as well.</p>
+          {!ways.email && (
+            <>
+              <label htmlFor="email">Email</label>
+              <input id="email" name="email" type="email" autoComplete="email" required />
+            </>
+          )}
+          <label htmlFor="password">Password</label>
+          <input id="password" name="password" type="password" autoComplete="new-password" minLength={10} required />
+          <button type="submit">Set password</button>
+        </form>
       )}
 
       <h2>Show what you play</h2>

@@ -1,59 +1,16 @@
-"use client"
+import Providers, { hasProviders } from "../providers"
+import { safeNext } from "@/lib/oauth"
+import LogInForm from "./form"
 
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
+const ERRORS: Record<string, string> = {
+  expired: "That sign-in took too long or was interrupted. Try again.",
+  failed: "That sign-in did not go through. Try again.",
+  telegram: "Telegram's answer could not be checked. Try again.",
+  access_denied: "Sign-in was cancelled.",
+}
 
-export default function LogIn() {
-  const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [busy, setBusy] = useState(false)
-
-  async function submit(event: React.FormEvent) {
-    event.preventDefault()
-    setBusy(true)
-    setError(null)
-    try {
-      const reply = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      })
-      const body = await reply.json().catch(() => ({}))
-      if (!reply.ok) {
-        setError(body.error ?? "Could not sign in.")
-        return
-      }
-      router.push("/dashboard")
-      router.refresh()
-    } catch {
-      setError("Could not reach the server.")
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  return (
-    <main className="wrap narrow">
-      <div className="brand">
-        <span className="mark">N</span> Noctorium
-      </div>
-      <h1>Sign in</h1>
-      <form className="card" onSubmit={submit}>
-        <label htmlFor="email">Email</label>
-        <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
-
-        <label htmlFor="password">Password</label>
-        <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
-
-        <button type="submit" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
-        {error && <div className="error">{error}</div>}
-      </form>
-      <p className="muted" style={{ marginTop: 18 }}>
-        No account yet? <Link href="/signup">Create one</Link>
-      </p>
-    </main>
-  )
+export default async function LogIn({ searchParams }: { searchParams: Promise<{ next?: string; error?: string }> }) {
+  const { next, error } = await searchParams
+  const to = safeNext(next)
+  return <LogInForm next={to} problem={error ? ERRORS[error] ?? ERRORS.failed : undefined} providers={hasProviders() ? <Providers next={to} /> : null} />
 }

@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   return Response.json({
     user: {
       id: Number(user.id),
-      email: user.email,
+      email: user.email ?? "",
       displayName: user.display_name,
       createdAt: user.created_at,
     },
