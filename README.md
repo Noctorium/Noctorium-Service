@@ -8,7 +8,7 @@ Next.js on Vercel, Postgres on Neon.
 
 ## Status
 
-Live at **https://noctorium-service.vercel.app**, on the `noctorium-service` Vercel project with a Neon
+Live at **https://service.noctorium.xyz**, on the `noctorium-service` Vercel project with a Neon
 database attached. Signing up, signing in, recording listens and reading statistics have all been exercised
 against the deployment.
 
