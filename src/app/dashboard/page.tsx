@@ -35,6 +35,12 @@ export default async function Dashboard() {
     GROUP BY title, artist ORDER BY streams DESC, title ASC LIMIT 10
   `) as { title: string; artist: string; streams: string }[]
 
+  const [linkRow] = (await sql`
+    SELECT (SELECT discord_name FROM discord_links WHERE user_id = ${session.userId}) AS discord,
+           (SELECT telegram_name FROM telegram_links WHERE user_id = ${session.userId}) AS telegram
+  `) as { discord: string | null; telegram: string | null }[]
+  const links = { discord: linkRow?.discord ?? null, telegram: linkRow?.telegram ?? null }
+
   const streams = Number(totals.streams)
   const hours = Number(totals.ms_played) / 3_600_000
 
@@ -94,6 +100,30 @@ export default async function Dashboard() {
           </tbody>
         </table>
       )}
+
+      <h2>Show what you play</h2>
+      <p className="muted">
+        Your Discord status and your Telegram bio show the song you are playing in Noctorium — from your phone or any
+        device signed in to this account, with no computer needed.
+      </p>
+      <table>
+        <tbody>
+          {(["discord", "telegram"] as const).map((service) => {
+            const linked = links[service]
+            return (
+              <tr key={service}>
+                <td>{service === "discord" ? "Discord status" : "Telegram bio"}</td>
+                <td className="muted">{linked ? `Connected as ${linked}` : "Not connected"}</td>
+                <td className="num">
+                  <a href={`/api/rpc/connect?service=${service}&action=${linked ? "disconnect" : "connect"}`}>
+                    {linked ? "Disconnect" : "Connect"}
+                  </a>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
     </main>
   )
 }

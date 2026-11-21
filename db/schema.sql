@@ -49,3 +49,34 @@ CREATE TABLE IF NOT EXISTS auth_attempts (
 
 -- Buckets nobody has touched in a long while can be swept without affecting anything live.
 CREATE INDEX IF NOT EXISTS auth_attempts_window_idx ON auth_attempts (window_started_at);
+
+-- Discord and Telegram linked to a Noctorium account, for the now-playing status the two RPC servers show
+-- (noctorium-discord-rpc-server, noctorium-telegram-rpc-server). Those servers write these rows; the service
+-- reads them to know whom to tell when somebody's music changes. Tokens and sessions are encrypted by the RPC
+-- servers (AES-GCM, RPC_ENCRYPTION_KEY) before they reach this table.
+CREATE TABLE IF NOT EXISTS discord_links (
+    user_id            BIGINT      PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    discord_user_id    TEXT        NOT NULL,
+    discord_name       TEXT        NOT NULL,
+    access_token       TEXT        NOT NULL,
+    refresh_token      TEXT        NOT NULL,
+    token_expires_at   TIMESTAMPTZ NOT NULL,
+    -- The headless session showing the status, while something plays; they last 20 minutes.
+    session_token      TEXT,
+    session_expires_at TIMESTAMPTZ,
+    -- What is playing, so the session can be renewed before it lapses.
+    playing            JSONB,
+    updated_at         TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS telegram_links (
+    user_id          BIGINT      PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    telegram_user_id TEXT        NOT NULL,
+    telegram_name    TEXT        NOT NULL,
+    session          TEXT        NOT NULL,
+    -- The bio the listener had before linking, put back whenever the music stops.
+    original_bio     TEXT        NOT NULL DEFAULT '',
+    shown_bio        TEXT,
+    bio_changed_at   TIMESTAMPTZ,
+    updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+);
