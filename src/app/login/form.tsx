@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import Brand from "../brand"
 
 export default function LogInForm({ next, providers, problem }: { next: string; providers: React.ReactNode; problem?: string }) {
   const router = useRouter()
@@ -37,9 +38,7 @@ export default function LogInForm({ next, providers, problem }: { next: string; 
 
   return (
     <main className="wrap narrow">
-      <div className="brand">
-        <span className="mark">N</span> Noctorium
-      </div>
+      <Brand />
       <h1>Sign in</h1>
       <form className="card" onSubmit={submit}>
         <label htmlFor="email">Email</label>
@@ -51,7 +50,7 @@ export default function LogInForm({ next, providers, problem }: { next: string; 
         <button type="submit" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
         {error && <div className="error">{error}</div>}
       </form>
-      {providers && <div className="or">or</div>}
+      {providers && <div className="or">or continue with</div>}
       {providers}
       <p className="muted" style={{ marginTop: 18 }}>
         No account yet? <Link href="/signup">Create one</Link>

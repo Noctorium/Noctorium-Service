@@ -1,30 +1,36 @@
 import { configured } from "@/lib/oauth"
 import { telegramBot } from "@/lib/telegram-login"
+import { ProviderIcon } from "./brand"
+
+type Provider = "discord" | "telegram" | "github"
+
+const NAMES: Record<Provider, string> = { discord: "Discord", telegram: "Telegram", github: "GitHub" }
+
+/** The providers whose keys are set, so a half-set-up provider is never a button that fails. */
+export const readyProviders = (): Provider[] =>
+  (["discord", "telegram", "github"] as const).filter((p) => (p === "telegram" ? telegramBot() !== null : configured(p)))
 
 /** Whether any provider is set up, so "or" is only written above buttons that are there. */
-export const hasProviders = () => configured("discord") || configured("github") || telegramBot() !== null
+export const hasProviders = () => readyProviders().length > 0
 
-/**
- * "Continue with Discord / GitHub / Telegram": only the ones whose keys are set, so a half-set-up provider is never a
- * button that fails. Telegram's opens the login bot in the Telegram app.
- */
-export default function Providers({ next, intent = "signin", telegramOnly = false }: { next: string; intent?: "signin" | "link"; telegramOnly?: boolean }) {
+/** Where a provider's sign-in (or, from the dashboard, its linking) starts. */
+export const startUrl = (provider: Provider, intent: "signin" | "link", next: string) => {
   const query = `intent=${intent}&next=${encodeURIComponent(next)}`
-  const bot = telegramBot()
-  const oauth = telegramOnly ? [] : (["discord", "github"] as const).filter(configured)
-  if (!oauth.length && !bot) return null
+  return provider === "telegram" ? `/api/auth/telegram/start?${query}` : `/api/auth/oauth/${provider}?${query}`
+}
+
+/** "Continue with" Discord, Telegram or GitHub: side by side, each in its own colours, with its mark. */
+export default function Providers({ next, intent = "signin" }: { next: string; intent?: "signin" | "link" }) {
+  const ready = readyProviders()
+  if (!ready.length) return null
   return (
     <div className="providers">
-      {oauth.map((provider) => (
-        <a key={provider} className={`provider ${provider}`} href={`/api/auth/oauth/${provider}?${query}`}>
-          {provider === "discord" ? "Continue with Discord" : "Continue with GitHub"}
+      {ready.map((provider) => (
+        <a key={provider} className={`provider ${provider}`} href={startUrl(provider, intent, next)}>
+          <ProviderIcon provider={provider} />
+          {NAMES[provider]}
         </a>
       ))}
-      {bot && (
-        <a className="provider telegram" href={`/api/auth/telegram/start?${query}`}>
-          Continue with Telegram
-        </a>
-      )}
     </div>
   )
 }

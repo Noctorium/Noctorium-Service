@@ -1,11 +1,10 @@
 import Link from "next/link"
+import Brand from "./brand"
 
 export default function Home() {
   return (
     <main className="wrap">
-      <div className="brand">
-        <span className="mark">N</span> Noctorium
-      </div>
+      <Brand />
       <h1>Your listening, counted.</h1>
       <p className="lede">
         A Noctorium account keeps track of what you play: how many songs you have streamed, how many

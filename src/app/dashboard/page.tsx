@@ -3,10 +3,9 @@ import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
 import { SESSION_COOKIE, readToken } from "@/lib/session"
 import SignOut from "./sign-out"
-import Providers from "../providers"
-import { PROVIDER_NAMES, PROVIDERS, waysIn } from "@/lib/identity"
-import { configured } from "@/lib/oauth"
-import { telegramBot } from "@/lib/telegram-login"
+import { readyProviders, startUrl } from "../providers"
+import { PROVIDER_NAMES, waysIn } from "@/lib/identity"
+import Brand from "../brand"
 
 export const dynamic = "force-dynamic"
 
@@ -47,7 +46,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const links = { discord: linkRow?.discord ?? null, telegram: linkRow?.telegram ?? null }
 
   const ways = await waysIn(session.userId)
-  const available = PROVIDERS.filter((p) => (p === "telegram" ? telegramBot() !== null : configured(p)))
+  const available = readyProviders()
   const notice =
     said.linked ? `${PROVIDER_NAMES[said.linked as keyof typeof PROVIDER_NAMES] ?? said.linked} is linked: you can sign in with it now.`
       : said.taken ? `That ${PROVIDER_NAMES[said.taken as keyof typeof PROVIDER_NAMES] ?? said.taken} account already signs in to a different Noctorium account.`
@@ -65,9 +64,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   return (
     <main className="wrap">
       <div className="row">
-        <div className="brand">
-          <span className="mark">N</span> Noctorium
-        </div>
+        <Brand />
         <SignOut />
       </div>
 
@@ -138,21 +135,14 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                     <input type="hidden" name="provider" value={provider} />
                     <button className="link" type="submit">Unlink</button>
                   </form>
-                ) : provider === "telegram" ? (
-                  "Link below"
                 ) : (
-                  <a href={`/api/auth/oauth/${provider}?intent=link`}>Link</a>
+                  <a href={startUrl(provider, "link", "/dashboard")}>Link</a>
                 )}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      {available.includes("telegram") && !ways.linked.telegram && (
-        <div style={{ marginTop: 12 }}>
-          <Providers next="/dashboard" intent="link" telegramOnly />
-        </div>
-      )}
       {!ways.password && (
         <form className="card" method="post" action="/api/auth/password" style={{ marginTop: 14 }}>
           <p className="muted">Add a password, to sign in with your email as well.</p>

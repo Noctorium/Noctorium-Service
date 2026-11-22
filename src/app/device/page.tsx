@@ -4,6 +4,7 @@ import Providers, { hasProviders } from "../providers"
 import { db } from "@/lib/db"
 import { deviceIsWaiting, normalCode } from "@/lib/device"
 import { SESSION_COOKIE, readToken } from "@/lib/session"
+import Brand from "../brand"
 
 export const dynamic = "force-dynamic"
 
@@ -19,9 +20,7 @@ export default async function Device({ searchParams }: { searchParams: Promise<{
 
   const page = (body: React.ReactNode) => (
     <main className="wrap narrow">
-      <div className="brand">
-        <span className="mark">N</span> Noctorium
-      </div>
+      <Brand />
       <h1>Sign in an app</h1>
       {body}
     </main>

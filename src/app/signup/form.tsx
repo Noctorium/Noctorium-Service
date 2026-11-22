@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import Brand from "../brand"
 
 export default function SignUpForm({ next, providers }: { next: string; providers: React.ReactNode }) {
   const router = useRouter()
@@ -38,9 +39,7 @@ export default function SignUpForm({ next, providers }: { next: string; provider
 
   return (
     <main className="wrap narrow">
-      <div className="brand">
-        <span className="mark">N</span> Noctorium
-      </div>
+      <Brand />
       <h1>Create an account</h1>
       <p className="lede">Used by both the website and the player.</p>
       <form className="card" onSubmit={submit}>
@@ -57,7 +56,7 @@ export default function SignUpForm({ next, providers }: { next: string; provider
         <button type="submit" disabled={busy}>{busy ? "Creating…" : "Create account"}</button>
         {error && <div className="error">{error}</div>}
       </form>
-      {providers && <div className="or">or</div>}
+      {providers && <div className="or">or continue with</div>}
       {providers}
       <p className="muted" style={{ marginTop: 18 }}>
         Already have one? <Link href="/login">Sign in</Link>
