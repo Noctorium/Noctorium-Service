@@ -5,7 +5,7 @@ import LogInForm from "./form"
 const ERRORS: Record<string, string> = {
   expired: "That sign-in took too long or was interrupted. Try again.",
   failed: "That sign-in did not go through. Try again.",
-  telegram: "Telegram's answer could not be checked. Try again.",
+  telegram: "Telegram sign-in did not go through. Try again.",
   access_denied: "Sign-in was cancelled.",
 }
 

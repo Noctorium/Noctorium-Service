@@ -1,5 +1,4 @@
 import assert from "node:assert/strict"
-import { createHash, createHmac } from "node:crypto"
 import { mkdtempSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
@@ -10,7 +9,7 @@ process.env.NOCTORIUM_LOCAL_DB = mkdtempSync(join(tmpdir(), "noctorium-signin-")
 
 const { signInWith, link, unlink, waysIn } = await import("../src/lib/identity.ts")
 const { allowDevice, normalCode, newCode, pollDevice, startDeviceLogin } = await import("../src/lib/device.ts")
-const { telegramProfile } = await import("../src/lib/telegram-login.ts")
+const { beginTelegramLogin, codeIsWaiting, collect, readUpdate, secretMatches, vouch, webhookSecret } = await import("../src/lib/telegram-login.ts")
 const { db } = await import("../src/lib/db.ts")
 
 test("a provider opens the account it is linked to, and a new one otherwise", async () => {
@@ -68,18 +67,36 @@ test("codes are read however they are typed, and nothing else is a code", () => 
   assert.equal(normalCode("short"), null)
 })
 
-test("Telegram's login is accepted only with Telegram's signature, and only for a day", () => {
-  const botToken = "123456:TEST-token"
-  const now = 1_800_000_000_000
-  const fields = { id: "4242", first_name: "Ana", username: "ana", auth_date: String(now / 1000 - 60) }
-  const check = Object.entries(fields).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `${k}=${v}`).join("\n")
-  const hash = createHmac("sha256", createHash("sha256").update(botToken).digest()).update(check).digest("hex")
-  const signed = new URLSearchParams({ ...fields, hash, intent: "signin", next: "/dashboard" })
-  assert.deepEqual(telegramProfile(signed, botToken, now), { provider: "telegram", id: "4242", name: "Ana", email: null })
+test("Telegram's updates are read for a start code and a confirmation, and nothing else", () => {
+  const from = { id: 4242, first_name: "Ana", username: "ana" }
+  assert.deepEqual(readUpdate({ message: { text: "/start Abc_12-x", chat: { id: 7, type: "private" }, from } }), { kind: "start", chat: 7, code: "Abc_12-x" })
+  assert.deepEqual(readUpdate({ message: { text: "/start", chat: { id: 7, type: "private" }, from } }), { kind: "start", chat: 7, code: null })
+  assert.equal(readUpdate({ message: { text: "/start x", chat: { id: -5, type: "group" }, from } }).kind, "other", "a group chat signed somebody in")
+  assert.equal(readUpdate({ message: { text: "/start x", chat: { id: 7, type: "private" }, from: { ...from, is_bot: true } } }).kind, "other")
+  assert.equal(readUpdate({ message: { text: "hello", chat: { id: 7, type: "private" }, from } }).kind, "other")
+  const confirm = readUpdate({ callback_query: { id: "q", data: "ok:code1", from, message: { message_id: 3, chat: { id: 7 } } } })
+  assert.deepEqual(confirm, { kind: "confirm", code: "code1", profile: { provider: "telegram", id: "4242", name: "Ana", email: null }, callback: "q", chat: 7, message: 3 })
+  assert.equal(readUpdate(null).kind, "other")
+})
 
-  const tampered = new URLSearchParams(signed)
-  tampered.set("id", "1")
-  assert.equal(telegramProfile(tampered, botToken, now), null)
-  assert.equal(telegramProfile(signed, "999:other-bot", now), null)
-  assert.equal(telegramProfile(signed, botToken, now + 2 * 86_400_000), null, "a day-old login was accepted")
+test("only Telegram, knowing the bot's token, gets past the webhook", () => {
+  const token = "123456:TEST-token"
+  assert.ok(secretMatches(webhookSecret(token), token))
+  assert.equal(secretMatches(webhookSecret("999:other"), token), false)
+  assert.equal(secretMatches(null, token), false)
+  assert.match(webhookSecret(token), /^[A-Za-z0-9_-]{1,256}$/, "Telegram refuses a secret with other characters")
+})
+
+test("a Telegram sign-in waits for Confirm, then opens once, only for the browser holding the poll secret", async () => {
+  const { code, pollToken } = await beginTelegramLogin("signin", "/dashboard")
+  assert.ok(await codeIsWaiting(code))
+  assert.deepEqual(await collect(pollToken, true), { state: "pending" })
+  assert.deepEqual(await collect("somebody-else", true), { state: "unknown" })
+  const ana = { provider: "telegram" as const, id: "4242", name: "Ana", email: null }
+  assert.ok(await vouch(code, ana))
+  assert.equal(await vouch(code, { ...ana, id: "6666" }), false, "a second confirmation replaced the first")
+  assert.equal(await codeIsWaiting(code), false)
+  assert.deepEqual(await collect(pollToken, false), { state: "confirmed", profile: ana, intent: "signin", next: "/dashboard" })
+  assert.equal((await collect(pollToken, true)).state, "confirmed")
+  assert.deepEqual(await collect(pollToken, true), { state: "unknown" }, "the same sign-in opened twice")
 })

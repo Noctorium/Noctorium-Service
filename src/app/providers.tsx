@@ -1,15 +1,12 @@
 import { configured } from "@/lib/oauth"
 import { telegramBot } from "@/lib/telegram-login"
-import TelegramButton from "./telegram-button"
-
-const SERVICE = process.env.SERVICE_URL ?? "https://service.noctorium.xyz"
 
 /** Whether any provider is set up, so "or" is only written above buttons that are there. */
 export const hasProviders = () => configured("discord") || configured("github") || telegramBot() !== null
 
 /**
  * "Continue with Discord / GitHub / Telegram": only the ones whose keys are set, so a half-set-up provider is never a
- * button that fails. Telegram's is Telegram's own Login Widget, which signs who signed in with the bot's token.
+ * button that fails. Telegram's opens the login bot in the Telegram app.
  */
 export default function Providers({ next, intent = "signin", telegramOnly = false }: { next: string; intent?: "signin" | "link"; telegramOnly?: boolean }) {
   const query = `intent=${intent}&next=${encodeURIComponent(next)}`
@@ -24,7 +21,9 @@ export default function Providers({ next, intent = "signin", telegramOnly = fals
         </a>
       ))}
       {bot && (
-        <TelegramButton bot={bot.name} authUrl={`${SERVICE}/api/auth/telegram?${query}`} />
+        <a className="provider telegram" href={`/api/auth/telegram/start?${query}`}>
+          Continue with Telegram
+        </a>
       )}
     </div>
   )

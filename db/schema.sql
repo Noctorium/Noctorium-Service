@@ -107,3 +107,15 @@ CREATE TABLE IF NOT EXISTS device_logins (
     expires_at TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Signing in with Telegram in the Telegram app: the browser's code, which the bot marks with who confirmed it.
+CREATE TABLE IF NOT EXISTS telegram_logins (
+    code        TEXT        PRIMARY KEY,
+    poll_hash   TEXT        NOT NULL UNIQUE,
+    intent      TEXT        NOT NULL,
+    next        TEXT        NOT NULL,
+    telegram_id TEXT,
+    name        TEXT,
+    expires_at  TIMESTAMPTZ NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
