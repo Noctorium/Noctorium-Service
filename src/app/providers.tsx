@@ -1,5 +1,6 @@
 import { configured } from "@/lib/oauth"
 import { telegramBot } from "@/lib/telegram-login"
+import TelegramButton from "./telegram-button"
 
 const SERVICE = process.env.SERVICE_URL ?? "https://service.noctorium.xyz"
 
@@ -23,16 +24,7 @@ export default function Providers({ next, intent = "signin", telegramOnly = fals
         </a>
       ))}
       {bot && (
-        <div className="telegram-widget">
-          <script
-            async
-            src="https://telegram.org/js/telegram-widget.js?22"
-            data-telegram-login={bot.name}
-            data-size="large"
-            data-radius="10"
-            data-auth-url={`${SERVICE}/api/auth/telegram?${query}`}
-          />
-        </div>
+        <TelegramButton bot={bot.name} authUrl={`${SERVICE}/api/auth/telegram?${query}`} />
       )}
     </div>
   )
