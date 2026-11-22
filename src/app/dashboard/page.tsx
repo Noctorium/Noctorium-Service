@@ -5,6 +5,7 @@ import { SESSION_COOKIE, readToken } from "@/lib/session"
 import SignOut from "./sign-out"
 import { readyProviders, startUrl } from "../providers"
 import { PROVIDER_NAMES, waysIn } from "@/lib/identity"
+import { SITE_NAMES, SITES, linked as scrobblersOf } from "@/lib/scrobblers"
 import Brand from "../brand"
 
 export const dynamic = "force-dynamic"
@@ -46,6 +47,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const links = { discord: linkRow?.discord ?? null, telegram: linkRow?.telegram ?? null }
 
   const ways = await waysIn(session.userId)
+  const scrobblers = await scrobblersOf(session.userId)
   const available = readyProviders()
   const notice =
     said.linked ? `${PROVIDER_NAMES[said.linked as keyof typeof PROVIDER_NAMES] ?? said.linked} is linked: you can sign in with it now.`
@@ -56,7 +58,10 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
               : said.password ? said.password
                 : said.discord === "connected" ? "Discord is connected: your status shows what you play."
                   : said.discord === "invalid_scope" ? "Discord did not allow showing your status from Noctorium yet."
-                    : null
+                    : said.scrobbler === "linked" ? "Linked: every Noctorium you sign in to scrobbles there now."
+                      : said.scrobbler === "unlinked" ? "Unlinked. Apps that already connected keep their own connection until you disconnect them there."
+                        : said.scrobbler === "refused" ? "That did not link. Check the token, or try connecting again."
+                          : null
 
   const streams = Number(totals.streams)
   const hours = Number(totals.ms_played) / 3_600_000
@@ -181,6 +186,49 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           })}
         </tbody>
       </table>
+
+      <h2>Scrobbling</h2>
+      <p className="muted">
+        Link Last.fm and ListenBrainz once, and every Noctorium you sign in to scrobbles there: the desktop, phone, TV,
+        terminal and Noctorium Rust connect by themselves, and for Noctorium Lite, the iPhone and the web player this
+        service scrobbles for you.
+      </p>
+      <table className="ways">
+        <tbody>
+          {SITES.map((site) => {
+            const link = scrobblers.find((s) => s.site === site)
+            return (
+              <tr key={site}>
+                <td>{SITE_NAMES[site]}</td>
+                <td className="muted">{link ? `Linked as ${link.username}` : "Not linked"}</td>
+                <td className="num">
+                  {link ? (
+                    <form method="post" action={`/api/scrobblers/${site}`}>
+                      <input type="hidden" name="unlink" value="1" />
+                      <button className="link" type="submit">Unlink</button>
+                    </form>
+                  ) : site === "lastfm" ? (
+                    <a href="/api/scrobblers/lastfm/start">Connect</a>
+                  ) : (
+                    "Paste your token below"
+                  )}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+      {!scrobblers.some((s) => s.site === "listenbrainz") && (
+        <form className="card" method="post" action="/api/scrobblers/listenbrainz" style={{ marginTop: 14 }}>
+          <label htmlFor="lb-token">ListenBrainz user token</label>
+          <input id="lb-token" name="token" autoComplete="off" required />
+          <p className="muted">
+            From <a href="https://listenbrainz.org/settings/">listenbrainz.org/settings</a>. It is kept sealed, and sent only to
+            ListenBrainz and to your own signed-in Noctorium apps.
+          </p>
+          <button type="submit">Link ListenBrainz</button>
+        </form>
+      )}
     </main>
   )
 }

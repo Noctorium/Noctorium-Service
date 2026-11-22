@@ -119,3 +119,13 @@ CREATE TABLE IF NOT EXISTS telegram_logins (
     expires_at  TIMESTAMPTZ NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Last.fm and ListenBrainz linked to the account: the session key or token sealed with AES-256-GCM, never plain.
+CREATE TABLE IF NOT EXISTS scrobblers (
+    user_id   BIGINT      NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    site      TEXT        NOT NULL,
+    username  TEXT        NOT NULL,
+    secret    TEXT        NOT NULL,
+    linked_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (user_id, site)
+);
