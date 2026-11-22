@@ -57,7 +57,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .ghost { height: auto; box-shadow: none; background: transparent; color: var(--muted); border: 1px solid var(--line); width: auto; margin: 0; padding: 8px 14px; font-size: 13.5px; }
 .empty { color: var(--muted); border: 1px dashed var(--line); border-radius: 14px; padding: 26px; text-align: center; }
 
-/* Signing in with Discord, GitHub or Telegram. */
+/* Signing in with Discord or Telegram. */
 .or { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12.5px; margin: 20px 0 12px; }
 .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .providers { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); }
@@ -72,7 +72,6 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .provider:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 .provider.discord { background: linear-gradient(180deg, #6b77f5, #5865f2); --glow: #5865f2; }
 .provider.telegram { background: linear-gradient(180deg, #34ace6, #229ed9); --glow: #229ed9; }
-.provider.github { background: linear-gradient(180deg, #333a42, #24292f); --glow: #000; }
 .code { font-size: 34px; font-weight: 700; letter-spacing: 0.12em; text-align: center; margin: 8px 0 18px; font-variant-numeric: tabular-nums; }
 .ways td form { display: inline; }
 .ways button.link { height: auto; box-shadow: none; width: auto; margin: 0; background: none; border: 0; color: var(--accent, inherit); padding: 0; font: inherit; cursor: pointer; text-decoration: underline; }

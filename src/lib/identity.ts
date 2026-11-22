@@ -2,17 +2,17 @@ import { db } from "./db.ts"
 import { cleanDisplayName, emailKey } from "./validate.ts"
 
 /**
- * Discord, GitHub and Telegram as ways into a Noctorium account.
+ * Discord and Telegram as ways into a Noctorium account.
  *
  * A provider's account opens the Noctorium account it is linked to, or a new one if it is linked to none. Accounts
  * are never joined by a matching email: an address a provider vouches for is not one this service has checked, and
  * merging on it is how an account is taken over. Linking a second way in is done on purpose, from the dashboard.
  */
 
-export type Provider = "discord" | "github" | "telegram"
-export const PROVIDERS: Provider[] = ["discord", "github", "telegram"]
+export type Provider = "discord" | "telegram"
+export const PROVIDERS: Provider[] = ["discord", "telegram"]
 
-export const PROVIDER_NAMES: Record<Provider, string> = { discord: "Discord", github: "GitHub", telegram: "Telegram" }
+export const PROVIDER_NAMES: Record<Provider, string> = { discord: "Discord", telegram: "Telegram" }
 
 /** What a provider says about who signed in. `email` only when the provider says it is verified. */
 export type ProviderProfile = { provider: Provider; id: string; name: string; email: string | null }

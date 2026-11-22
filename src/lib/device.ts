@@ -3,7 +3,7 @@ import { db } from "./db.ts"
 
 /**
  * Signing an app in from a browser: the app asks for a code, shows it and opens /device; the listener signs in there
- * with any way they have -- Discord, GitHub, Telegram or email -- and allows it; the app, which alone holds the poll
+ * with any way they have -- Discord, Telegram or email -- and allows it; the app, which alone holds the poll
  * secret, collects the account token. Only the secret's hash is kept, and a code lasts ten minutes and is used once.
  */
 

@@ -4,10 +4,10 @@ import { finish, redirect } from "@/lib/signed-in"
 
 export const runtime = "nodejs"
 
-/** Back from Discord or GitHub. */
+/** Back from Discord. */
 export async function GET(request: Request, { params }: { params: Promise<{ provider: string }> }) {
   const { provider } = await params
-  if ((provider !== "discord" && provider !== "github") || !configured(provider)) return new Response("Unknown way to sign in.", { status: 404 })
+  if (provider !== "discord" || !configured(provider)) return new Response("Unknown way to sign in.", { status: 404 })
   const url = new URL(request.url)
   const jar = await cookies()
   const started = await readState(jar.get("noctorium_oauth")?.value, url.searchParams.get("state"))

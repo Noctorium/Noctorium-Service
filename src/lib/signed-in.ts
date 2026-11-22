@@ -15,7 +15,7 @@ function cookieFor(token: string): string {
 }
 
 /**
- * What happens once Discord, GitHub or Telegram has said who somebody is: signing them in (to the account it is
+ * What happens once Discord or Telegram has said who somebody is: signing them in (to the account it is
  * linked to, or a new one) and going on to `next`; or, when they were linking it from the dashboard, adding it to the
  * account they are signed in to.
  */

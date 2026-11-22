@@ -7,7 +7,7 @@ import { checkPassword, cleanEmail, emailKey } from "@/lib/validate"
 export const runtime = "nodejs"
 
 /**
- * For an account made with Discord, GitHub or Telegram: adds an email and password, so it can sign in with those too.
+ * For an account made with Discord or Telegram: adds an email and password, so it can sign in with those too.
  * The email must not belong to another account.
  */
 export async function POST(request: Request) {

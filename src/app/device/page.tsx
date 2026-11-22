@@ -9,7 +9,7 @@ import Brand from "../brand"
 export const dynamic = "force-dynamic"
 
 /**
- * Where an app sends somebody to sign it in: they sign in here with any way they have -- Discord, GitHub, Telegram or
+ * Where an app sends somebody to sign it in: they sign in here with any way they have -- Discord, Telegram or
  * email -- check the code is the one the app shows, and allow it. The app then signs itself in.
  */
 export default async function Device({ searchParams }: { searchParams: Promise<{ code?: string; allowed?: string; error?: string }> }) {

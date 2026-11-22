@@ -81,12 +81,12 @@ CREATE TABLE IF NOT EXISTS telegram_links (
     updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Accounts made with Discord, GitHub or Telegram have no password, and Telegram gives no email.
+-- Accounts made with Discord or Telegram have no password, and Telegram gives no email.
 ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
 ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
 ALTER TABLE users ALTER COLUMN email_key DROP NOT NULL;
 
--- The other ways to sign in to an account: one row per Discord, GitHub or Telegram account linked to it. A
+-- The other ways to sign in to an account: one row per Discord or Telegram account linked to it. A
 -- provider's account belongs to one Noctorium account only; linking it to a second is refused, never merged.
 CREATE TABLE IF NOT EXISTS identities (
     provider         TEXT        NOT NULL,

@@ -57,7 +57,7 @@ export async function POST(request: Request) {
   }
 
   const user = found[0] as { id: number; email: string; display_name: string; password_hash: string | null }
-  // An account made with Discord, GitHub or Telegram has no password until one is set on its dashboard.
+  // An account made with Discord or Telegram has no password until one is set on its dashboard.
   if (!user.password_hash) {
     await costOfAMiss(password)
     return jsonError(refusal, 401)

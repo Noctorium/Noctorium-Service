@@ -23,21 +23,21 @@ test("a provider opens the account it is linked to, and a new one otherwise", as
 
 test("accounts are never joined by a matching email", async () => {
   await db()`INSERT INTO users (email, email_key, display_name, password_hash) VALUES ('sam@example.com', 'sam@example.com', 'Sam', 'x')`
-  const viaGitHub = await signInWith({ provider: "github", id: "g9", name: "Sam?", email: "sam@example.com" })
+  const viaDiscord = await signInWith({ provider: "discord", id: "d9", name: "Sam?", email: "sam@example.com" })
   const [sam] = (await db()`SELECT id FROM users WHERE email_key = 'sam@example.com'`) as { id: number }[]
-  assert.notEqual(viaGitHub.id, Number(sam.id), "GitHub's word about an email opened somebody's account")
-  assert.equal(viaGitHub.email, "", "the new account took an email another account has")
+  assert.notEqual(viaDiscord.id, Number(sam.id), "Discord's word about an email opened somebody's account")
+  assert.equal(viaDiscord.email, "", "the new account took an email another account has")
 })
 
 test("linking adds a way in; one already elsewhere is refused; the last way in stays", async () => {
   const user = await signInWith({ provider: "telegram", id: "t1", name: "Tea", email: null })
-  assert.equal(await link(user.id, { provider: "github", id: "g1", name: "tea", email: null }), "linked")
+  assert.equal(await link(user.id, { provider: "discord", id: "d2", name: "tea", email: null }), "linked")
   assert.equal(await link(user.id, { provider: "discord", id: "d1", name: "Ana", email: null }), "taken")
-  assert.deepEqual(Object.keys((await waysIn(user.id)).linked).sort(), ["github", "telegram"])
+  assert.deepEqual(Object.keys((await waysIn(user.id)).linked).sort(), ["discord", "telegram"])
   assert.equal(await unlink(user.id, "telegram"), "unlinked")
-  assert.equal(await unlink(user.id, "github"), "last", "the only way in was taken away")
-  const viaGitHub = await signInWith({ provider: "github", id: "g1", name: "tea", email: null })
-  assert.equal(viaGitHub.id, user.id)
+  assert.equal(await unlink(user.id, "discord"), "last", "the only way in was taken away")
+  const viaDiscord = await signInWith({ provider: "discord", id: "d2", name: "tea", email: null })
+  assert.equal(viaDiscord.id, user.id)
 })
 
 test("a device is signed in once, by the person who allowed it, and codes expire", async () => {

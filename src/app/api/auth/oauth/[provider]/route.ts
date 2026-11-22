@@ -3,10 +3,10 @@ import { authorizeUrl, configured, signState, type OAuthProvider } from "@/lib/o
 
 export const runtime = "nodejs"
 
-/** Starts signing in (or linking) with Discord or GitHub: ?intent=signin|link&next=/somewhere */
+/** Starts signing in (or linking) with Discord: ?intent=signin|link&next=/somewhere */
 export async function GET(request: Request, { params }: { params: Promise<{ provider: string }> }) {
   const { provider } = await params
-  if ((provider !== "discord" && provider !== "github") || !configured(provider)) return new Response("Unknown way to sign in.", { status: 404 })
+  if (provider !== "discord" || !configured(provider)) return new Response("Unknown way to sign in.", { status: 404 })
   const url = new URL(request.url)
   const state = randomBytes(16).toString("base64url")
   const signed = await signState(state, url.searchParams.get("intent") === "link" ? "link" : "signin", url.searchParams.get("next") ?? "/dashboard")
