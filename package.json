@@ -2,7 +2,7 @@
   "name": "noctorium-service",
   "version": "0.32.1",
   "private": true,
-  "description": "Accounts and listening statistics for Noctorium",
+  "description": "Listening statistics for Noctorium, at stats.noctorium.xyz",
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/apply-schema.mjs && next build",

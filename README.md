@@ -1,8 +1,12 @@
-# Noctorium Service
+# Noctorium Stats
 
-Accounts and listening statistics for [Noctorium](https://github.com/Noctorium). One account works
-in both the player and this website: it counts how many songs you have streamed, how many different ones,
-and how many hours that adds up to.
+Listening statistics for [Noctorium](https://github.com/Noctorium), at **https://stats.noctorium.xyz**: the listens
+every Noctorium reports, the figures it reads back (in the apps and on this site), what is playing for the Discord
+status and Telegram bio, and scrobbling to Last.fm and ListenBrainz for the apps that cannot themselves.
+
+Signing in and the account itself are [noctorium-account-server](https://github.com/Noctorium/noctorium-account-server),
+at **https://account.noctorium.xyz**, on the same Neon database and the same `AUTH_SECRET`. Apps from before 0.39 still
+ask this address for sign-in: those requests are passed through to the account server (`next.config.mjs`).
 
 Next.js on Vercel, Postgres on Neon.
 
