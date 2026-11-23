@@ -27,6 +27,10 @@ export async function POST(request: Request) {
     SELECT EXISTS (SELECT 1 FROM discord_links WHERE user_id = ${session.userId}) AS discord,
            EXISTS (SELECT 1 FROM telegram_links WHERE user_id = ${session.userId}) AS telegram
   `) as { discord: boolean; telegram: boolean }[]
+  await (track
+    ? db()`INSERT INTO now_playing (user_id, track) VALUES (${session.userId}, ${JSON.stringify(track)}::jsonb)
+           ON CONFLICT (user_id) DO UPDATE SET track = EXCLUDED.track, updated_at = now()`
+    : db()`DELETE FROM now_playing WHERE user_id = ${session.userId}`)
   const services = (["discord", "telegram"] as RpcService[]).filter((s) => linked?.[s])
   if (services.length) after(() => Promise.all(services.map((s) => tell(s, session.userId, track))))
   const song = body.relay === true ? readSong(body.track) : null

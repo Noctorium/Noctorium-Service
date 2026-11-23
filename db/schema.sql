@@ -129,3 +129,11 @@ CREATE TABLE IF NOT EXISTS scrobblers (
     linked_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (user_id, site)
 );
+
+-- What each listener is playing now, as their player last said; gone when it stops. Read by the Telegram stats
+-- bot (noctorium-tg-stats-tracker-server). A row older than 20 minutes counts as stopped.
+CREATE TABLE IF NOT EXISTS now_playing (
+    user_id     BIGINT      PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    track       JSONB       NOT NULL,
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);

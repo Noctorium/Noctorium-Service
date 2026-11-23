@@ -86,6 +86,13 @@ export function readNowPlaying(value: unknown): NowPlaying | null {
   }
 }
 
+/** Whether a request comes from one of Noctorium's own servers: `Authorization: Bearer RPC_SECRET`. */
+export function fromNoctoriumServer(request: Request): boolean {
+  const given = Buffer.from(request.headers.get("authorization") ?? "")
+  const expected = Buffer.from(`Bearer ${secret()}`)
+  return given.length === expected.length && timingSafeEqual(given, expected)
+}
+
 /** Tells one RPC server what [userId] is playing now (null: nothing). Failures are logged, never thrown. */
 export async function tell(service: RpcService, userId: number, track: NowPlaying | null): Promise<void> {
   try {

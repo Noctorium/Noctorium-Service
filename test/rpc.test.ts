@@ -35,3 +35,12 @@ test("now-playing is cleaned: titles required, lengths bounded, only https links
   assert.equal(track?.url, "https://music.youtube.com/watch?v=1")
   assert.equal(track?.durationMs, undefined)
 })
+
+test("only a request carrying RPC_SECRET counts as one of Noctorium's servers", async () => {
+  const { fromNoctoriumServer } = await load()
+  const asking = (authorization?: string) =>
+    new Request("https://stats.noctorium.xyz/api/internal/stats?user=1", { headers: authorization ? { authorization } : {} })
+  assert.equal(fromNoctoriumServer(asking(`Bearer ${process.env.RPC_SECRET}`)), true)
+  assert.equal(fromNoctoriumServer(asking("Bearer not-the-secret")), false)
+  assert.equal(fromNoctoriumServer(asking()), false)
+})
