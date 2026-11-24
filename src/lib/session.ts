@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify } from "jose"
 import { cookies } from "next/headers"
+import { db } from "./db.ts"
 
 /**
  * Who is signed in, for both the website and the desktop player.
@@ -43,6 +44,10 @@ export async function readToken(token: string | undefined | null): Promise<Sessi
     const email = typeof payload.email === "string" ? payload.email : null
     // An account made with Telegram has no email: "" in its token, never a missing claim.
     if (!Number.isInteger(userId) || userId <= 0 || email === null) return null
+    // Signed out on account.noctorium.xyz by a password or email change (tokens from before epochs carry none: 0),
+    // or the account is deleted.
+    const [row] = (await db()`SELECT session_epoch FROM users WHERE id = ${userId}`) as { session_epoch: number }[]
+    if (!row || (typeof payload.ver === "number" ? payload.ver : 0) < Number(row.session_epoch)) return null
     return { userId, email }
   } catch {
     return null

@@ -23,5 +23,12 @@ export async function GET(request: Request) {
     }),
     db()`SELECT track FROM now_playing WHERE user_id = ${user} AND updated_at > now() - interval '20 minutes'`,
   ])
-  return Response.json({ stats, nowPlaying: (playing[0] as { track?: unknown } | undefined)?.track ?? null })
+  const [who] = (await db()`SELECT display_name, avatar_key FROM users WHERE id = ${user}`) as { display_name: string; avatar_key: string | null }[]
+  const account = process.env.ACCOUNT_URL ?? "https://account.noctorium.xyz"
+  return Response.json({
+    stats,
+    nowPlaying: (playing[0] as { track?: unknown } | undefined)?.track ?? null,
+    name: who?.display_name ?? null,
+    avatarUrl: who?.avatar_key ? `${account}/avatar/${who.avatar_key}` : null,
+  })
 }

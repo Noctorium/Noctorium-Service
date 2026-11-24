@@ -76,3 +76,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .ways td form { display: inline; }
 .ways button.link { height: auto; box-shadow: none; width: auto; margin: 0; background: none; border: 0; color: var(--accent, inherit); padding: 0; font: inherit; cursor: pointer; text-decoration: underline; }
 .notice { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 14px 0; font-size: 14px; }
+
+/* The listener's picture (or first letter) beside their name. */
+h1.who { display: flex; align-items: center; gap: 14px; }
+.avatar { display: inline-grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: var(--panel-2, #17161f); color: var(--accent, #b47cff); font-size: 20px; box-shadow: 0 0 0 1px var(--line, #262433); }

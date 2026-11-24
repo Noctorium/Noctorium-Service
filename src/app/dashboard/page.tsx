@@ -7,6 +7,8 @@ import Brand from "../brand"
 
 export const dynamic = "force-dynamic"
 
+const avatarUrl = (key: string) => `${process.env.ACCOUNT_URL ?? "https://account.noctorium.xyz"}/avatar/${key}`
+
 /** Whole numbers with thin separators, so six figures stay readable at a glance. */
 const count = (value: number) => value.toLocaleString("en-US")
 
@@ -16,8 +18,9 @@ export default async function Dashboard() {
   if (!session) redirect("https://account.noctorium.xyz/login")
 
   const sql = db()
-  const [profile] = (await sql`SELECT display_name FROM users WHERE id = ${session.userId} LIMIT 1`) as {
+  const [profile] = (await sql`SELECT display_name, avatar_key FROM users WHERE id = ${session.userId} LIMIT 1`) as {
     display_name: string
+    avatar_key: string | null
   }[]
   if (!profile) redirect("https://account.noctorium.xyz/login")
 
@@ -46,7 +49,15 @@ export default async function Dashboard() {
         <SignOut />
       </div>
 
-      <h1>{profile.display_name}</h1>
+      <h1 className="who">
+        {profile.avatar_key ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="avatar" src={avatarUrl(profile.avatar_key)} width={44} height={44} alt="" />
+        ) : (
+          <span className="avatar" aria-hidden>{(profile.display_name.trim()[0] ?? "?").toUpperCase()}</span>
+        )}
+        {profile.display_name}
+      </h1>
       <p className="lede">Everything the player has recorded for you.</p>
 
       <div className="grid">
