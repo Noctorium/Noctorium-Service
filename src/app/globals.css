@@ -80,3 +80,18 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 /* The listener's picture (or first letter) beside their name. */
 h1.who { display: flex; align-items: center; gap: 14px; }
 .avatar { display: inline-grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: var(--panel-2, #17161f); color: var(--accent, #b47cff); font-size: 20px; box-shadow: 0 0 0 1px var(--line, #262433); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 16px; }
+.chip { width: auto; height: 34px; margin: 0; box-shadow: none; background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 0 14px; font-weight: 500; }
+.chip.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.bars { display: flex; align-items: flex-end; gap: 2px; }
+.bar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; min-width: 0; }
+.bar .fill { width: 100%; background: var(--accent); border-radius: 3px 3px 0 0; opacity: .85; }
+.bar:hover .fill { opacity: 1; }
+.bar .k { font-size: 11px; color: var(--muted); height: 18px; line-height: 18px; margin-top: 4px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0 28px; }
+.share { margin: 8px 0; }
+.share .row { margin: 0 0 4px; }
+.share .track { height: 6px; background: var(--panel-2); border-radius: 3px; overflow: hidden; }
+.share .track div { height: 100%; }
+.small { font-size: 12px; }
